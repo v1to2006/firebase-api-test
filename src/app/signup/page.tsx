@@ -26,17 +26,12 @@ const SignUp: React.FC = () => {
     }
   };
 
-  const handleEmailChange = (e: ChangeEvent<HTMLInputElement>) => {
+  const handleEmailChange = (e: ChangeEvent<HTMLInputElement>) =>
     setEmail(e.target.value);
-  };
-
-  const handlePasswordChange = (e: ChangeEvent<HTMLInputElement>) => {
+  const handlePasswordChange = (e: ChangeEvent<HTMLInputElement>) =>
     setPassword(e.target.value);
-  };
-
-  const handleRepeatPasswordChange = (e: ChangeEvent<HTMLInputElement>) => {
+  const handleRepeatPasswordChange = (e: ChangeEvent<HTMLInputElement>) =>
     setRepeatPassword(e.target.value);
-  };
 
   return (
     <div>
@@ -48,6 +43,8 @@ const SignUp: React.FC = () => {
                 Sign Up
               </h1>
               {error && <p className="text-red-500 text-sm">{error}</p>}
+
+              {/* Sign-Up Form */}
               <form className="space-y-4 md:space-y-6" onSubmit={signUp}>
                 <div>
                   <label
@@ -63,6 +60,7 @@ const SignUp: React.FC = () => {
                     id="email"
                     className="bg-gray-50 border border-gray-300 text-gray-900 rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
                     placeholder="name@company.com"
+                    required
                   />
                 </div>
                 <div>
@@ -79,6 +77,7 @@ const SignUp: React.FC = () => {
                     id="password"
                     placeholder="••••••••"
                     className="bg-gray-50 border border-gray-300 text-gray-900 rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                    required
                   />
                 </div>
                 <div>
@@ -95,6 +94,7 @@ const SignUp: React.FC = () => {
                     id="repeatPassword"
                     placeholder="••••••••"
                     className="bg-gray-50 border border-gray-300 text-gray-900 rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                    required
                   />
                 </div>
                 <button

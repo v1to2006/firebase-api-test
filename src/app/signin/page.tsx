@@ -1,31 +1,25 @@
 "use client";
 import { signIn } from "next-auth/react";
+import { useRouter } from "next/navigation";
 import React, { useState, ChangeEvent, MouseEvent } from "react";
 
 const SignIn: React.FC = () => {
   const [email, setEmail] = useState<string>("");
   const [password, setPassword] = useState<string>("");
+  const router = useRouter();
 
-  const handleEmailChange = (e: ChangeEvent<HTMLInputElement>) => {
+  const handleEmailChange = (e: ChangeEvent<HTMLInputElement>) =>
     setEmail(e.target.value);
-  };
-
-  const handlePasswordChange = (e: ChangeEvent<HTMLInputElement>) => {
+  const handlePasswordChange = (e: ChangeEvent<HTMLInputElement>) =>
     setPassword(e.target.value);
-  };
-
-  const handleSignIn = async (e: MouseEvent<HTMLButtonElement>) => {
+  const handleSignInClick = (e: MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
-    try {
-      await signIn("credentials", {
-        email,
-        password,
-        redirect: true,
-        callbackUrl: "/",
-      });
-    } catch (error) {
-      console.error("Sign-in failed", error);
-    }
+    signIn("credentials", {
+      email,
+      password,
+      redirect: true,
+      callbackUrl: "/",
+    });
   };
 
   return (
@@ -37,20 +31,24 @@ const SignIn: React.FC = () => {
               <h1 className="text-xl font-bold leading-tight tracking-tight text-gray-900 md:text-2xl dark:text-white">
                 Sign in to your account
               </h1>
+
+              {/* Google Sign-In Button */}
               <div className="flex dark:bg-gray-800">
                 <button
                   onClick={() => signIn("google")}
-                  className="px-4 py-2 border flex gap-2 border-slate-200 dark:border-slate-700 rounded-lg text-slate-700 dark:text-slate-200 hover:border-slate-400 dark:hover:border-slate-500 hover:text-slate-900 dark:hover:text-slate-300 hover:shadow transition duration-150"
+                  className="flex items-center px-4 py-2 border gap-2 border-slate-200 dark:border-slate-700 rounded-lg text-slate-700 dark:text-slate-200 hover:border-slate-400 dark:hover:border-slate-500 hover:text-slate-900 dark:hover:text-slate-300 hover:shadow transition duration-150"
                 >
                   <img
                     className="w-6 h-6"
                     src="https://www.svgrepo.com/show/475656/google-color.svg"
                     loading="lazy"
-                    alt="google logo"
+                    alt="Google logo"
                   />
                   <span>Login with Google</span>
                 </button>
               </div>
+
+              {/* Sign-In Form */}
               <form className="space-y-4 md:space-y-6">
                 <div>
                   <label
@@ -64,8 +62,10 @@ const SignIn: React.FC = () => {
                     type="email"
                     name="email"
                     id="email"
-                    className="bg-gray-50 border border-gray-300 text-gray-900 rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
                     placeholder="name@company.com"
+                    className="bg-gray-50 border border-gray-300 text-gray-900 rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                    autoComplete="email"
+                    required
                   />
                 </div>
                 <div>
@@ -82,6 +82,8 @@ const SignIn: React.FC = () => {
                     id="password"
                     placeholder="••••••••"
                     className="bg-gray-50 border border-gray-300 text-gray-900 rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                    autoComplete="current-password"
+                    required
                   />
                 </div>
                 <div className="flex items-center justify-between">
@@ -111,7 +113,7 @@ const SignIn: React.FC = () => {
                   </a>
                 </div>
                 <button
-                  onClick={handleSignIn}
+                  onClick={handleSignInClick}
                   disabled={!email || !password}
                   className="cursor-pointer w-full text-white bg-primary-600 hover:bg-primary-700 focus:ring-4 focus:outline-none focus:ring-primary-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800"
                 >
