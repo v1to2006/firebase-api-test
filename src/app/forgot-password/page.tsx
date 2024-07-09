@@ -1,7 +1,7 @@
 "use client";
 import { sendPasswordResetEmail } from "firebase/auth";
 import React, { useState, ChangeEvent, MouseEvent } from "react";
-import { auth } from "../firebase";
+import { auth } from "../../../firebase";
 
 const ForgotPassword: React.FC = () => {
   const [email, setEmail] = useState<string>("");
