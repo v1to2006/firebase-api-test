@@ -30,12 +30,6 @@ export default function Home() {
           <h1 className="pt-20 text-black font-medium text-3xl">
             You are not signed in
           </h1>
-          <a href="/signin" className="mt-5 text-blue-700 hover:underline">
-            Sign In
-          </a>
-          <a href="/signup" className="mt-5 text-blue-700 hover:underline">
-            Sign Up
-          </a>
         </>
       ) : (
         <>

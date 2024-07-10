@@ -1,5 +1,9 @@
 "use client";
-import { signInWithEmailAndPassword, signInWithPopup } from "firebase/auth";
+import {
+  signInWithEmailAndPassword,
+  signInWithPopup,
+  signOut,
+} from "firebase/auth";
 import { useRouter } from "next/navigation";
 import React, { useState, ChangeEvent } from "react";
 import { auth, googleProvider } from "../../../firebase";
@@ -12,16 +16,25 @@ const SignIn: React.FC = () => {
 
   const handleEmailChange = (e: ChangeEvent<HTMLInputElement>) =>
     setEmail(e.target.value);
-
   const handlePasswordChange = (e: ChangeEvent<HTMLInputElement>) =>
     setPassword(e.target.value);
 
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      await signInWithEmailAndPassword(auth, email, password);
-      setError(null);
-      router.push("/");
+      const userCredential = await signInWithEmailAndPassword(
+        auth,
+        email,
+        password
+      );
+      const user = userCredential.user;
+      if (!user.emailVerified) {
+        await signOut(auth);
+        setError("Your email is not verified. Please check your email.");
+      } else {
+        setError(null);
+        router.push("/");
+      }
     } catch (error: any) {
       switch (error.code) {
         case "auth/user-not-found":
@@ -34,17 +47,26 @@ const SignIn: React.FC = () => {
           setError("Invalid email format.");
           break;
         default:
-          setError("Failed to sign in.");
+          setError(
+            "Failed to sign in. Please check your email and password and try again."
+          );
       }
     }
   };
 
   const handleGoogleSignIn = async () => {
     try {
-      await signInWithPopup(auth, googleProvider);
-      router.push("/");
+      const userCredential = await signInWithPopup(auth, googleProvider);
+      const user = userCredential.user;
+      if (!user.emailVerified) {
+        await signOut(auth);
+        setError("Your email is not verified. Please check your email.");
+      } else {
+        setError(null);
+        router.push("/");
+      }
     } catch (error: any) {
-      console.error(error.message);
+      setError("Failed to sign in with Google. Please try again.");
     }
   };
 
@@ -142,7 +164,6 @@ const SignIn: React.FC = () => {
                 </div>
                 <button
                   type="submit"
-                  disabled={!email || !password}
                   className="cursor-pointer w-full text-white bg-primary-600 hover:bg-primary-700 focus:ring-4 focus:outline-none focus:ring-primary-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800"
                 >
                   Sign in
