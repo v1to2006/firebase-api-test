@@ -1,26 +1,65 @@
 "use client";
-import { createUserWithEmailAndPassword } from "firebase/auth";
+import {
+  createUserWithEmailAndPassword,
+  sendEmailVerification,
+} from "firebase/auth";
 import React, { useState, ChangeEvent, FormEvent } from "react";
 import { useRouter } from "next/navigation";
-import { auth } from "../firebase";
+import { auth } from "../../../firebase";
 
 const SignUp: React.FC = () => {
   const [email, setEmail] = useState<string>("");
   const [password, setPassword] = useState<string>("");
   const [repeatPassword, setRepeatPassword] = useState<string>("");
   const [error, setError] = useState<string | null>(null);
+  const [emailError, setEmailError] = useState<string | null>(null);
+  const [passwordError, setPasswordError] = useState<string | null>(null);
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const router = useRouter();
+
+  const validateEmail = (email: string) => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+  };
+
+  const validatePassword = (password: string) => {
+    const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$/;
+    return passwordRegex.test(password);
+  };
 
   const signUp = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    setError(null);
+
+    if (!validateEmail(email)) {
+      setEmailError("Invalid email format.");
+      return;
+    } else {
+      setEmailError(null);
+    }
+
+    if (!validatePassword(password)) {
+      setPasswordError(
+        "Password must be at least 8 characters long and contain at least one letter and one number."
+      );
+      return;
+    } else {
+      setPasswordError(null);
+    }
+
     if (password !== repeatPassword) {
-      setError("Passwords do not match");
+      setError("Passwords do not match.");
       return;
     }
 
     try {
-      await createUserWithEmailAndPassword(auth, email, password);
-      router.push("/");
+      const userCredential = await createUserWithEmailAndPassword(
+        auth,
+        email,
+        password
+      );
+      await sendEmailVerification(userCredential.user);
+      setSuccessMessage("Verification email sent. Please check your inbox.");
     } catch (error: any) {
       setError(error.message);
     }
@@ -28,8 +67,10 @@ const SignUp: React.FC = () => {
 
   const handleEmailChange = (e: ChangeEvent<HTMLInputElement>) =>
     setEmail(e.target.value);
+
   const handlePasswordChange = (e: ChangeEvent<HTMLInputElement>) =>
     setPassword(e.target.value);
+
   const handleRepeatPasswordChange = (e: ChangeEvent<HTMLInputElement>) =>
     setRepeatPassword(e.target.value);
 
@@ -42,7 +83,11 @@ const SignUp: React.FC = () => {
               <h1 className="text-xl font-bold leading-tight tracking-tight text-gray-900 md:text-2xl dark:text-white">
                 Sign Up
               </h1>
+
               {error && <p className="text-red-500 text-sm">{error}</p>}
+              {successMessage && (
+                <p className="text-green-500 text-sm">{successMessage}</p>
+              )}
 
               {/* Sign-Up Form */}
               <form className="space-y-4 md:space-y-6" onSubmit={signUp}>
@@ -62,6 +107,9 @@ const SignUp: React.FC = () => {
                     placeholder="name@company.com"
                     required
                   />
+                  {emailError && (
+                    <p className="text-red-500 text-sm">{emailError}</p>
+                  )}
                 </div>
                 <div>
                   <label
@@ -79,6 +127,9 @@ const SignUp: React.FC = () => {
                     className="bg-gray-50 border border-gray-300 text-gray-900 rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
                     required
                   />
+                  {passwordError && (
+                    <p className="text-red-500 text-sm">{passwordError}</p>
+                  )}
                 </div>
                 <div>
                   <label
@@ -99,12 +150,6 @@ const SignUp: React.FC = () => {
                 </div>
                 <button
                   type="submit"
-                  disabled={
-                    !email ||
-                    !password ||
-                    !repeatPassword ||
-                    password !== repeatPassword
-                  }
                   className="w-full text-white bg-primary-600 hover:bg-primary-700 focus:ring-4 focus:outline-none focus:ring-primary-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800"
                 >
                   Sign Up

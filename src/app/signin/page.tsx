@@ -1,25 +1,73 @@
 "use client";
-import { signIn } from "next-auth/react";
+import {
+  signInWithEmailAndPassword,
+  signInWithPopup,
+  signOut,
+} from "firebase/auth";
 import { useRouter } from "next/navigation";
-import React, { useState, ChangeEvent, MouseEvent } from "react";
+import React, { useState, ChangeEvent } from "react";
+import { auth, googleProvider } from "../../../firebase";
 
 const SignIn: React.FC = () => {
   const [email, setEmail] = useState<string>("");
   const [password, setPassword] = useState<string>("");
+  const [error, setError] = useState<string | null>(null);
   const router = useRouter();
 
   const handleEmailChange = (e: ChangeEvent<HTMLInputElement>) =>
     setEmail(e.target.value);
   const handlePasswordChange = (e: ChangeEvent<HTMLInputElement>) =>
     setPassword(e.target.value);
-  const handleSignInClick = (e: MouseEvent<HTMLButtonElement>) => {
+
+  const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
-    signIn("credentials", {
-      email,
-      password,
-      redirect: true,
-      callbackUrl: "/",
-    });
+    try {
+      const userCredential = await signInWithEmailAndPassword(
+        auth,
+        email,
+        password
+      );
+      const user = userCredential.user;
+      if (!user.emailVerified) {
+        await signOut(auth);
+        setError("Your email is not verified. Please check your email.");
+      } else {
+        setError(null);
+        router.push("/");
+      }
+    } catch (error: any) {
+      switch (error.code) {
+        case "auth/user-not-found":
+          setError("No user found with this email.");
+          break;
+        case "auth/wrong-password":
+          setError("Incorrect password.");
+          break;
+        case "auth/invalid-email":
+          setError("Invalid email format.");
+          break;
+        default:
+          setError(
+            "Failed to sign in. Please check your email and password and try again."
+          );
+      }
+    }
+  };
+
+  const handleGoogleSignIn = async () => {
+    try {
+      const userCredential = await signInWithPopup(auth, googleProvider);
+      const user = userCredential.user;
+      if (!user.emailVerified) {
+        await signOut(auth);
+        setError("Your email is not verified. Please check your email.");
+      } else {
+        setError(null);
+        router.push("/");
+      }
+    } catch (error: any) {
+      setError("Failed to sign in with Google. Please try again.");
+    }
   };
 
   return (
@@ -35,7 +83,7 @@ const SignIn: React.FC = () => {
               {/* Google Sign-In Button */}
               <div className="flex dark:bg-gray-800">
                 <button
-                  onClick={() => signIn("google")}
+                  onClick={handleGoogleSignIn}
                   className="flex items-center px-4 py-2 border gap-2 border-slate-200 dark:border-slate-700 rounded-lg text-slate-700 dark:text-slate-200 hover:border-slate-400 dark:hover:border-slate-500 hover:text-slate-900 dark:hover:text-slate-300 hover:shadow transition duration-150"
                 >
                   <img
@@ -48,8 +96,10 @@ const SignIn: React.FC = () => {
                 </button>
               </div>
 
+              {error && <p className="text-red-500">{error}</p>}
+
               {/* Sign-In Form */}
-              <form className="space-y-4 md:space-y-6">
+              <form onSubmit={handleSignIn} className="space-y-4 md:space-y-6">
                 <div>
                   <label
                     htmlFor="email"
@@ -113,8 +163,7 @@ const SignIn: React.FC = () => {
                   </a>
                 </div>
                 <button
-                  onClick={handleSignInClick}
-                  disabled={!email || !password}
+                  type="submit"
                   className="cursor-pointer w-full text-white bg-primary-600 hover:bg-primary-700 focus:ring-4 focus:outline-none focus:ring-primary-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800"
                 >
                   Sign in
